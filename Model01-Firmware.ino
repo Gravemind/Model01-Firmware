@@ -6,6 +6,19 @@
 #define BUILD_INFORMATION "locally built"
 #endif
 
+/**
+ * Set to 1 or 0 to enable or disable a feature
+ */
+
+#define ENABLE_EEPROM           1
+#define ENABLE_FOCUS            1
+#define ENABLE_MOUSE            1 // also see keymap
+#define ENABLE_MACROS           1
+#define ENABLE_NUMPAD           ENABLE_MACROS && 1
+#define ENABLE_LEDANIMATIONS    1
+#define ENABLE_COLORMAP         ENABLE_EEPROM && 1
+#define ENABLE_TESTMODE         1
+#define ENABLE_MAGICCOMBO       1
 
 /**
  * These #include directives pull in the Kaleidoscope firmware core,
@@ -16,32 +29,45 @@
 // The Kaleidoscope core
 #include "Kaleidoscope.h"
 
+#if ENABLE_EEPROM
 // Support for storing the keymap in EEPROM
 #include "Kaleidoscope-EEPROM-Settings.h"
 #include "Kaleidoscope-EEPROM-Keymap.h"
+#endif
 
+#if ENABLE_FOCUS
 // Support for communicating with the host via a simple Serial protocol
 #include "Kaleidoscope-FocusSerial.h"
+#endif
 
+#if ENABLE_MOUSE
 // Support for keys that move the mouse
 #include "Kaleidoscope-MouseKeys.h"
+#endif
 
+#if ENABLE_MACROS
 // Support for macros
 #include "Kaleidoscope-Macros.h"
+#endif
 
 // Support for controlling the keyboard's LEDs
 #include "Kaleidoscope-LEDControl.h"
 
+#if ENABLE_NUMPAD
 // Support for "Numpad" mode, which is mostly just the Numpad specific LED mode
 #include "Kaleidoscope-NumPad.h"
+#endif
 
+#if ENABLE_LEDANIMATIONS
 // Support for the "Boot greeting" effect, which pulses the 'LED' button for 10s
 // when the keyboard is connected to a computer (or that computer is powered on)
 #include "Kaleidoscope-LEDEffect-BootGreeting.h"
+#endif
 
 // Support for LED modes that set all LEDs to a single color
 #include "Kaleidoscope-LEDEffect-SolidColor.h"
 
+#if ENABLE_LEDANIMATIONS
 // Support for an LED mode that makes all the LEDs 'breathe'
 #include "Kaleidoscope-LEDEffect-Breathe.h"
 
@@ -56,22 +82,30 @@
 
 // Support for an LED mode that prints the keys you press in letters 4px high
 #include "Kaleidoscope-LED-AlphaSquare.h"
+#endif // ENABLE_LEDANIMATIONS
 
+#if ENABLE_COLORMAP
 // Support for an LED mode that lets one configure per-layer color maps
 #include "Kaleidoscope-Colormap.h"
+#endif
 
+#if ENABLE_TESTMODE
 // Support for Keyboardio's internal keyboard testing mode
 #include "Kaleidoscope-Model01-TestMode.h"
+#endif
 
 // Support for host power management (suspend & wakeup)
 #include "Kaleidoscope-HostPowerManagement.h"
 
+#if ENABLE_MAGICCOMBO
 // Support for magic combos (key chords that trigger an action)
 #include "Kaleidoscope-MagicCombo.h"
+#endif
 
 // Support for USB quirks, like changing the key state report protocol
 #include "Kaleidoscope-USB-Quirks.h"
 
+#if ENABLE_MACROS
 /** This 'enum' is a list of all the macros used by the Model 01's firmware
   * The names aren't particularly important. What is important is that each
   * is unique.
@@ -89,6 +123,9 @@ enum { MACRO_VERSION_INFO,
        MACRO_ANY
      };
 
+#else
+#define M(...) ___
+#endif // ENABLE_MACROS
 
 
 /** The Model 01's key layouts are defined as 'keymaps'. By default, there are three
@@ -278,6 +315,7 @@ KEYMAPS(
 /* Re-enable astyle's indent enforcement */
 // *INDENT-ON*
 
+#if ENABLE_MACROS
 /** versionInfoMacro handles the 'firmware version info' macro
  *  When a key bound to the macro is pressed, this macro
  *  prints out the firmware build information as virtual keystrokes
@@ -336,6 +374,7 @@ const macro_t *macroAction(uint8_t macroIndex, uint8_t keyState) {
   }
   return MACRO_NONE;
 }
+#endif // ENABLE_MACROS
 
 
 
@@ -379,6 +418,7 @@ void hostPowerManagementEventHandler(kaleidoscope::plugin::HostPowerManagement::
   toggleLedsOnSuspendResume(event);
 }
 
+#if ENABLE_MAGICCOMBO
 /** This 'enum' is a list of all the magic combos used by the Model 01's
  * firmware The names aren't particularly important. What is important is that
  * each is unique.
@@ -407,20 +447,27 @@ USE_MAGIC_COMBOS({.action = toggleKeyboardProtocol,
                   // Left Fn + Esc + Shift
                   .keys = { R3C6, R2C6, R3C7 }
                  });
+#endif // ENABLE_MAGICCOMBO
 
 // First, tell Kaleidoscope which plugins you want to use.
 // The order can be important. For example, LED effects are
 // added in the order they're listed here.
 KALEIDOSCOPE_INIT_PLUGINS(
+
+#if ENABLE_EEPROM
   // The EEPROMSettings & EEPROMKeymap plugins make it possible to have an
   // editable keymap in EEPROM.
   EEPROMSettings,
   EEPROMKeymap,
+#endif
 
+#if ENABLE_FOCUS
   // Focus allows bi-directional communication with the host, and is the
   // interface through which the keymap in EEPROM can be edited.
   Focus,
+#endif
 
+#if ENABLE_FOCUS && ENABLE_EEPROM
   // FocusSettingsCommand adds a few Focus commands, intended to aid in
   // changing some settings of the keyboard, such as the default layer (via the
   // `settings.defaultLayer` command)
@@ -429,14 +476,19 @@ KALEIDOSCOPE_INIT_PLUGINS(
   // FocusEEPROMCommand adds a set of Focus commands, which are very helpful in
   // both debugging, and in backing up one's EEPROM contents.
   FocusEEPROMCommand,
+#endif // ENABLE_FOCUS && ENABLE_EEPROM
 
+#if ENABLE_LEDANIMATIONS
   // The boot greeting effect pulses the LED button for 10 seconds after the
   // keyboard is first connected
   BootGreetingEffect,
+#endif
 
+#if ENABLE_TESTMODE
   // The hardware test mode, which can be invoked by tapping Prog, LED and the
   // left Fn button at the same time.
   TestMode,
+#endif
 
   // LEDControl provides support for other LED modes
   LEDControl,
@@ -444,6 +496,7 @@ KALEIDOSCOPE_INIT_PLUGINS(
   // We start with the LED effect that turns off all the LEDs.
   LEDOff,
 
+#if ENABLE_LEDANIMATIONS
   // The rainbow effect changes the color of all of the keyboard's keys at the same time
   // running through all the colors of the rainbow.
   LEDRainbowEffect,
@@ -455,10 +508,12 @@ KALEIDOSCOPE_INIT_PLUGINS(
   // The chase effect follows the adventure of a blue pixel which chases a red pixel across
   // your keyboard. Spoiler: the blue pixel never catches the red pixel
   LEDChaseEffect,
+#endif // ENABLE_LEDANIMATIONS
 
   // These static effects turn your keyboard's LEDs a variety of colors
   solidRed, solidOrange, solidYellow, solidGreen, solidBlue, solidIndigo, solidViolet,
 
+#if ENABLE_LEDANIMATIONS
   // The breathe effect slowly pulses all of the LEDs on your keyboard
   LEDBreatheEffect,
 
@@ -468,28 +523,39 @@ KALEIDOSCOPE_INIT_PLUGINS(
 
   // The stalker effect lights up the keys you've pressed recently
   StalkerEffect,
+#endif // ENABLE_LEDANIMATIONS
 
+#if ENABLE_COLORMAP
   // The Colormap effect makes it possible to set up per-layer colormaps
   ColormapEffect,
+#endif
 
+#if ENABLE_NUMPAD
   // The numpad plugin is responsible for lighting up the 'numpad' mode
   // with a custom LED effect
   NumPad,
+#endif
 
+#if ENABLE_MACROS
   // The macros plugin adds support for macros
   Macros,
+#endif
 
+#if ENABLE_MOUSE
   // The MouseKeys plugin lets you add keys to your keymap which move the mouse.
   MouseKeys,
+#endif
 
   // The HostPowerManagement plugin allows us to turn LEDs off when then host
   // goes to sleep, and resume them when it wakes up.
   HostPowerManagement,
 
+#if ENABLE_MAGICCOMBO
   // The MagicCombo plugin lets you use key combinations to trigger custom
   // actions - a bit like Macros, but triggered by pressing multiple keys at the
   // same time.
   MagicCombo,
+#endif
 
   // The USBQuirks plugin lets you do some things with USB that we aren't
   // comfortable - or able - to do automatically, but can be useful
@@ -506,10 +572,13 @@ void setup() {
   // First, call Kaleidoscope's internal setup function
   Kaleidoscope.setup();
 
+#if ENABLE_NUMPAD
   // While we hope to improve this in the future, the NumPad plugin
   // needs to be explicitly told which keymap layer is your numpad layer
   NumPad.numPadLayer = NUMPAD;
+#endif
 
+#if ENABLE_LEDANIMATIONS
   // We configure the AlphaSquare effect to use RED letters
   AlphaSquare.color = CRGB(255, 0, 0);
 
@@ -522,23 +591,28 @@ void setup() {
   // 'BlazingTrail'. For details on other options, see
   // https://github.com/keyboardio/Kaleidoscope/blob/master/doc/plugin/LED-Stalker.md
   StalkerEffect.variant = STALKER(BlazingTrail);
+#endif // ENABLE_LEDANIMATIONS
 
   // We want to make sure that the firmware starts with LED effects off
   // This avoids over-taxing devices that don't have a lot of power to share
   // with USB devices
   LEDOff.activate();
 
+#if ENABLE_EEPROM
   // To make the keymap editable without flashing new firmware, we store
   // additional layers in EEPROM. For now, we reserve space for five layers. If
   // one wants to use these layers, just set the default layer to one in EEPROM,
   // by using the `settings.defaultLayer` Focus command, or by using the
   // `keymap.onlyCustom` command to use EEPROM layers only.
   EEPROMKeymap.setup(5);
+#endif
 
+#if ENABLE_COLORMAP
   // We need to tell the Colormap plugin how many layers we want to have custom
   // maps for. To make things simple, we set it to five layers, which is how
   // many editable layers we have (see above).
   ColormapEffect.max_layers(5);
+#endif
 }
 
 /** loop is the second of the standard Arduino sketch functions.
