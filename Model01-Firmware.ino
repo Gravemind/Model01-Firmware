@@ -10,15 +10,15 @@
  * Set to 1 or 0 to enable or disable a feature
  */
 
-#define ENABLE_EEPROM           1
-#define ENABLE_FOCUS            1
-#define ENABLE_MOUSE            1 // also see keymap
-#define ENABLE_MACROS           1
-#define ENABLE_NUMPAD           ENABLE_MACROS && 1
-#define ENABLE_LEDANIMATIONS    1
-#define ENABLE_COLORMAP         ENABLE_EEPROM && 1
-#define ENABLE_TESTMODE         1
-#define ENABLE_MAGICCOMBO       1
+#define ENABLE_EEPROM           0
+#define ENABLE_FOCUS            0
+#define ENABLE_MOUSE            0 // also see keymap
+#define ENABLE_MACROS           0
+#define ENABLE_NUMPAD           ENABLE_MACROS && 0
+#define ENABLE_LEDANIMATIONS    0
+#define ENABLE_COLORMAP         ENABLE_EEPROM && 0
+#define ENABLE_TESTMODE         0
+#define ENABLE_MAGICCOMBO       1 // for TOGGLE_NKRO_MODE
 #define ENABLE_ONESHOT          1
 #define ENABLE_ACTIVEMODCOLOR   1
 #define ENABLE_IDLELEDS         1
@@ -194,7 +194,7 @@ enum { MACRO_VERSION_INFO,
   *
   */
 
-enum { PRIMARY, NUMPAD, FUNCTION }; // layers
+enum { PRIMARY, GAME, FUNCTION }; // layers
 
 
 /**
@@ -222,22 +222,26 @@ enum { PRIMARY, NUMPAD, FUNCTION }; // layers
  */
 // *INDENT-OFF*
 
+#define OSM_never(kc)    Key_ ## kc
+#define OSM_mod(kc)      Key_ ## kc
+#define OSM_always(kc)   OSM(kc)
+
 KEYMAPS(
 
 #if defined (PRIMARY_KEYMAP_QWERTY)
   [PRIMARY] = KEYMAP_STACKED
-  (___,          Key_1, Key_2, Key_3, Key_4, Key_5, Key_LEDEffectNext,
+  (___,          Key_1, Key_2, Key_3, Key_4, Key_5, Key_Delete,
    Key_Backtick, Key_Q, Key_W, Key_E, Key_R, Key_T, Key_Tab,
    Key_PageUp,   Key_A, Key_S, Key_D, Key_F, Key_G,
    Key_PageDown, Key_Z, Key_X, Key_C, Key_V, Key_B, Key_Escape,
-   Key_LeftControl, Key_Backspace, Key_LeftGui, Key_LeftShift,
+   Key_LeftGui, OSM_mod(LeftShift), Key_Backspace, OSM_mod(LeftControl),
    ShiftToLayer(FUNCTION),
 
-   M(MACRO_ANY),  Key_6, Key_7, Key_8,     Key_9,         Key_0,         LockLayer(NUMPAD),
-   Key_Enter,     Key_Y, Key_U, Key_I,     Key_O,         Key_P,         Key_Equals,
-                  Key_H, Key_J, Key_K,     Key_L,         Key_Semicolon, Key_Quote,
-   Key_RightAlt,  Key_N, Key_M, Key_Comma, Key_Period,    Key_Slash,     Key_Minus,
-   Key_RightShift, Key_LeftAlt, Key_Spacebar, Key_RightControl,
+   OSM_always(RightAlt), Key_6, Key_7, Key_8,     Key_9,         Key_0,         Key_Minus,
+   Key_Tab,              Key_Y, Key_U, Key_I,     Key_O,         Key_P,         Key_Equals,
+                         Key_H, Key_J, Key_K,     Key_L,         Key_Semicolon, Key_Quote,
+   Key_Enter,            Key_N, Key_M, Key_Comma, Key_Period,    Key_Slash,     Key_LEDEffectNext,
+   OSM_mod(LeftControl), OSM_mod(LeftAlt), Key_Spacebar, OSM_mod(RightShift),
    ShiftToLayer(FUNCTION)),
 
 #elif defined (PRIMARY_KEYMAP_DVORAK)
@@ -298,35 +302,34 @@ KEYMAPS(
 #endif
 
 
-
-  [NUMPAD] =  KEYMAP_STACKED
-  (___, ___, ___, ___, ___, ___, ___,
-   ___, ___, ___, ___, ___, ___, ___,
-   ___, ___, ___, ___, ___, ___,
-   ___, ___, ___, ___, ___, ___, ___,
-   ___, ___, ___, ___,
+  [GAME] =  KEYMAP_STACKED
+  (Key_Backtick,  ___, ___, ___, ___, ___, ___,
+   Key_Tab,       ___, ___, ___, ___, ___, ___,
+   Key_CapsLock,  ___, ___, ___, ___, ___,
+   Key_LeftShift, ___, ___, ___, ___, ___, ___,
+   ___, Key_LeftAlt, Key_Space, ___,
    ___,
 
-   M(MACRO_VERSION_INFO),  ___, Key_Keypad7, Key_Keypad8,   Key_Keypad9,        Key_KeypadSubtract, ___,
-   ___,                    ___, Key_Keypad4, Key_Keypad5,   Key_Keypad6,        Key_KeypadAdd,      ___,
-                           ___, Key_Keypad1, Key_Keypad2,   Key_Keypad3,        Key_Equals,         ___,
-   ___,                    ___, Key_Keypad0, Key_KeypadDot, Key_KeypadMultiply, Key_KeypadDivide,   Key_Enter,
+   ___, ___, ___, ___, ___, ___, ___,
+   ___, ___, ___, ___, ___, ___, ___,
+        ___, ___, ___, ___, ___, ___,
+   ___, ___, ___, ___, ___, ___, ___,
    ___, ___, ___, ___,
    ___),
 
   [FUNCTION] =  KEYMAP_STACKED
-  (___,      Key_F1,           Key_F2,      Key_F3,     Key_F4,        Key_F5,           Key_CapsLock,
-   Key_Tab,  ___,              Key_mouseUp, ___,        Key_mouseBtnR, Key_mouseWarpEnd, Key_mouseWarpNE,
-   Key_Home, Key_mouseL,       Key_mouseDn, Key_mouseR, Key_mouseBtnL, Key_mouseWarpNW,
-   Key_End,  Key_PrintScreen,  Key_Insert,  ___,        Key_mouseBtnM, Key_mouseWarpSW,  Key_mouseWarpSE,
-   ___, Key_Delete, ___, ___,
+  (___,      Key_F1,          Key_F2,         Key_F3,        Key_F4,      Key_F5, ___,
+   Key_Tab,  Key_Insert,      Key_UpArrow,    ___,            ___,        ___,    ___,
+   Key_Home, Key_LeftArrow,   Key_DownArrow,  Key_RightArrow, Key_End,    ___,
+   Key_End,  Key_PrintScreen, Key_ScrollLock, Key_Pause,      Key_Insert, ___,    Key_Enter,
+   ___, ___, Key_Backspace, ___,
    ___,
 
-   Consumer_ScanPreviousTrack, Key_F6,                 Key_F7,                   Key_F8,                   Key_F9,          Key_F10,          Key_F11,
-   Consumer_PlaySlashPause,    Consumer_ScanNextTrack, Key_LeftCurlyBracket,     Key_RightCurlyBracket,    Key_LeftBracket, Key_RightBracket, Key_F12,
-                               Key_LeftArrow,          Key_DownArrow,            Key_UpArrow,              Key_RightArrow,  ___,              ___,
-   Key_PcApplication,          Consumer_Mute,          Consumer_VolumeDecrement, Consumer_VolumeIncrement, ___,             Key_Backslash,    Key_Pipe,
-   ___, ___, Key_Enter, ___,
+   Consumer_ScanPreviousTrack, Key_F6,                   Key_F7,                   Key_F8,        Key_F9,          Key_F10,          Key_F11,
+   Consumer_PlaySlashPause,    Key_LeftCurlyBracket,     Key_RightCurlyBracket,    Key_UpArrow,   Key_LeftBracket, Key_RightBracket, Key_F12,
+                               Key_Home,                 Key_LeftArrow,            Key_DownArrow, Key_RightArrow,  Key_End,          Key_Pipe,
+   Consumer_ScanNextTrack,     Consumer_VolumeDecrement, Consumer_VolumeIncrement, Consumer_Mute, ___,             Key_Backslash,    LockLayer(GAME),
+   OSM_never(RightControl), ___, ___, ___,
    ___)
 ) // KEYMAPS(
 
@@ -404,6 +407,22 @@ const macro_t *macroAction(uint8_t macroIndex, uint8_t keyState) {
 static kaleidoscope::plugin::LEDSolidColor solidRed(160, 0, 0);
 static kaleidoscope::plugin::LEDSolidColor solidOrange(140, 70, 0);
 static kaleidoscope::plugin::LEDSolidColor solidYellow(130, 100, 0);
+
+static kaleidoscope::plugin::LEDSolidColor solidOranges[] = {
+  // //{0xa0,0x50, 0},
+  // //{0x8c,0x46, 0},
+
+  {0x78,0x3c, 0},
+
+  // //{0x64,0x32, 0},
+
+  {0x50,0x28, 0},
+
+  // {0x3c,0x1e, 0},
+  // {0x28,0x14, 0},
+  // //{0x14, 0xa, 0},
+};
+
 static kaleidoscope::plugin::LEDSolidColor solidGreen(0, 160, 0);
 static kaleidoscope::plugin::LEDSolidColor solidBlue(0, 70, 130);
 static kaleidoscope::plugin::LEDSolidColor solidIndigo(0, 0, 170);
@@ -529,7 +548,15 @@ KALEIDOSCOPE_INIT_PLUGINS(
 #endif // ENABLE_LEDANIMATIONS
 
   // These static effects turn your keyboard's LEDs a variety of colors
-  solidRed, solidOrange, solidYellow, solidGreen, solidBlue, solidIndigo, solidViolet,
+  // solidRed, solidOrange, solidYellow, solidGreen, solidBlue, solidIndigo, solidViolet,
+  solidOranges[0],
+  // solidOranges[1],
+  // solidOranges[2],
+  // solidOranges[3],
+  // solidOranges[4],
+  // solidOranges[5],
+  // solidOranges[6],
+  // solidOranges[7],
 
 #if ENABLE_LEDANIMATIONS
   // The breathe effect slowly pulses all of the LEDs on your keyboard
@@ -628,7 +655,7 @@ void setup() {
   // We want to make sure that the firmware starts with LED effects off
   // This avoids over-taxing devices that don't have a lot of power to share
   // with USB devices
-  LEDOff.activate();
+  solidOranges[0].activate();
 
 #if ENABLE_EEPROM
   // To make the keymap editable without flashing new firmware, we store
@@ -648,9 +675,9 @@ void setup() {
 
 #if ENABLE_ONESHOT
   // Sticky timeout
-  //kaleidoscope::plugin::OneShot::time_out = 2500;
+  kaleidoscope::plugin::OneShot::time_out = 2500;
   // Single-tap sticky if press duration is shorter than hold_time_out
-  kaleidoscope::plugin::OneShot::hold_time_out = 200;
+  kaleidoscope::plugin::OneShot::hold_time_out = 250;
   // Double-tab sticky if interval is shorter than double_tap_time_out (-1 to use time_out)
   kaleidoscope::plugin::OneShot::double_tap_time_out = 500;
 #endif
@@ -660,7 +687,7 @@ void setup() {
 #endif
 
 #if ENABLE_IDLELEDS
-  kaleidoscope::plugin::IdleLEDs::idle_time_limit = 600; // 10min
+  kaleidoscope::plugin::IdleLEDs::idle_time_limit = 3600; // 1h
 #endif
 
 }
