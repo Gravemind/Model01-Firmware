@@ -19,6 +19,8 @@
 #define ENABLE_COLORMAP         ENABLE_EEPROM && 1
 #define ENABLE_TESTMODE         1
 #define ENABLE_MAGICCOMBO       1
+#define ENABLE_ONESHOT          1
+#define ENABLE_ACTIVEMODCOLOR   1
 
 /**
  * These #include directives pull in the Kaleidoscope firmware core,
@@ -104,6 +106,17 @@
 
 // Support for USB quirks, like changing the key state report protocol
 #include "Kaleidoscope-USB-Quirks.h"
+
+#if ENABLE_ONESHOT
+#include <Kaleidoscope-Escape-OneShot.h>
+#include <Kaleidoscope-OneShot.h>
+#else
+#define OSM(kc) Key_ ## kc
+#endif
+
+#if ENABLE_ACTIVEMODCOLOR
+#include <Kaleidoscope-LED-ActiveModColor.h>
+#endif
 
 #if ENABLE_MACROS
 /** This 'enum' is a list of all the macros used by the Model 01's firmware
@@ -562,6 +575,16 @@ KALEIDOSCOPE_INIT_PLUGINS(
   // nevertheless. Such as toggling the key report protocol between Boot (used
   // by BIOSes) and Report (NKRO).
   USBQuirks
+
+#if ENABLE_ONESHOT
+  ,OneShot
+  ,EscapeOneShot
+#endif
+
+#if ENABLE_ACTIVEMODCOLOR
+  ,ActiveModColorEffect
+#endif
+
 );
 
 /** The 'setup' function is one of the two standard Arduino sketch functions.
@@ -613,6 +636,20 @@ void setup() {
   // many editable layers we have (see above).
   ColormapEffect.max_layers(5);
 #endif
+
+#if ENABLE_ONESHOT
+  // Sticky timeout
+  //kaleidoscope::plugin::OneShot::time_out = 2500;
+  // Single-tap sticky if press duration is shorter than hold_time_out
+  kaleidoscope::plugin::OneShot::hold_time_out = 200;
+  // Double-tab sticky if interval is shorter than double_tap_time_out (-1 to use time_out)
+  kaleidoscope::plugin::OneShot::double_tap_time_out = 500;
+#endif
+
+#if ENABLE_ACTIVEMODCOLOR
+  ActiveModColorEffect.highlight_color = CRGB(0x04, 0x04, 0x80);
+#endif
+
 }
 
 /** loop is the second of the standard Arduino sketch functions.
