@@ -21,6 +21,7 @@
 #define ENABLE_MAGICCOMBO       1
 #define ENABLE_ONESHOT          1
 #define ENABLE_ACTIVEMODCOLOR   1
+#define ENABLE_IDLELEDS         1
 
 /**
  * These #include directives pull in the Kaleidoscope firmware core,
@@ -116,6 +117,10 @@
 
 #if ENABLE_ACTIVEMODCOLOR
 #include <Kaleidoscope-LED-ActiveModColor.h>
+#endif
+
+#if ENABLE_IDLELEDS
+#include <Kaleidoscope-IdleLEDs.h>
 #endif
 
 #if ENABLE_MACROS
@@ -585,6 +590,10 @@ KALEIDOSCOPE_INIT_PLUGINS(
   ,ActiveModColorEffect
 #endif
 
+#if ENABLE_IDLELEDS
+  ,IdleLEDs
+#endif
+
 );
 
 /** The 'setup' function is one of the two standard Arduino sketch functions.
@@ -648,6 +657,10 @@ void setup() {
 
 #if ENABLE_ACTIVEMODCOLOR
   ActiveModColorEffect.highlight_color = CRGB(0x04, 0x04, 0x80);
+#endif
+
+#if ENABLE_IDLELEDS
+  kaleidoscope::plugin::IdleLEDs::idle_time_limit = 600; // 10min
 #endif
 
 }
